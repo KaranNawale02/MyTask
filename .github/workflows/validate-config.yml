@@ -1,0 +1,54 @@
+name: Validate Configuration Files
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'cfgfiles/**'  
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0  # Fetch the entire Git history
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies (if any)
+      run: |
+        python -m pip install --upgrade pip
+    - name: Debug commit hashes
+      run: |
+        echo "Base SHA: ${{ github.event.pull_request.base.sha }}"
+        echo "Head SHA: ${{ github.event.pull_request.head.sha }}"
+
+    - name: Get changed config files
+      id: changed-files
+      run: |
+        changed_files=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} -- cfgfiles/)
+        if [[ -n "$changed_files" ]]; then
+          echo "changed_files=$(echo "$changed_files" | tr '\n' ',' | sed 's/,$//')" >> $GITHUB_OUTPUT
+        else
+          echo "changed_files=" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Debug git diff output
+      run: |
+        git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} -- cfgfiles/
+
+    - name: Run validation script
+      if: ${{ steps.changed-files.outputs.changed_files != '' }}
+      run: |
+        python utils/check_cfg_params.py --input_files "${{ steps.changed-files.outputs.changed_files }}" --default_file "test_data/expected.cfg"
+
+    - name: Check for script errors
+      if: ${{ failure() }}
+      run: echo "Validation failed."
