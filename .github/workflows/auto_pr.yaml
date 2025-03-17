@@ -1,0 +1,24 @@
+name: Auto Create PR to Automation
+
+on:
+  push:
+    branches-ignore:
+      - main
+
+jobs:
+  create_pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # needed for gh pr create
+
+      - name: Install GitHub CLI
+        uses: cli/setup-gh@v1 #This is already installed on github actions, but it is good practice to explicitly state the setup.
+
+      - name: Create Pull Request
+        run: |
+          gh pr create --base automation --title "Auto PR from ${{ github.ref_name }}" --body "Auto PR created by GitHub Actions"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
