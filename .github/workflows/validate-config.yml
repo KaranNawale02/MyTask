@@ -28,7 +28,7 @@ jobs:
 
     - name: Run validation script
       run: |
-        python validate_config.py --input_files "$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | grep 'configfiles/' | tr '\n' ',' | sed 's/,$//')" --default_file "test_data/expected.cfg"
+        python check_cfg_params.py --input_files "$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | grep 'configfiles/' | tr '\n' ',' | sed 's/,$//')" --default_file "test_data/expected.cfg"
       shell: bash
 
     - name: Check for script errors
