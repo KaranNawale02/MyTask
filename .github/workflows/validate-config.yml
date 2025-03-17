@@ -3,7 +3,7 @@ name: Validate Configuration Files
 on:
   pull_request:
     branches:
-      - main
+      - automation
     paths:
       - 'cfgfiles/**'  
 
