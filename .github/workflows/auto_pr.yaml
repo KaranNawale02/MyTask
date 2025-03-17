@@ -5,6 +5,9 @@ on:
     branches-ignore:
       - main
 
+permissions:
+  pull-requests: write
+
 jobs:
   create_pr:
     runs-on: ubuntu-latest
